@@ -1,16 +1,6 @@
 #include "bitlibrary.h"
 #include <stdio.h>
 
-//Prints the board
-// void printBoard(unsigned long long bitBoard) {
-//     for (int i = 0; i < 8; i++) {
-//         for (int j = 8 * i; j < 8 * (i + 1); j++) {
-//             printf("%llu ", getBit(bitBoard, j));
-//         }
-//         printf("\n");
-//     }
-// }
-
 void printBoard(unsigned long long redBoard, unsigned long long blackBoard) {
     for (int i = 0; i < 8; i++) {
         for (int j = 8 * i; j < 8 * (i + 1); j++) {
@@ -47,10 +37,37 @@ unsigned long long* setBoard() {
 }
 
 /* checkLegalMoves
+ * @param unsigned long long int redBoard: board of red
+ * @param unsigned long long int blackBoard: board of black
  * @param int pos: position of selected piece
  * @param int player: 0 for black, 1 for red
- * @returns int*: positions of available moves
+ * @returns int: 0 for false, 1 for true
 */
+void checkLegalMoves(unsigned long long int redBoard, unsigned long long int blackBoard, int player, int legalMoves[][2]) {
+    unsigned long long int playerBoard = player == 0 ? blackBoard : redBoard;
+
+    int count = 0;
+    for (int pos = 0; pos < 64; pos++) {
+        if (getBit(playerBoard, pos) == 1) {
+            int posVertical = (player == 0) ? pos + 8 : pos - 8;
+
+            if (pos % 8 < 7) {
+                if (getBit(redBoard, posVertical + 1) == 0 && getBit(blackBoard, posVertical + 1) == 0) {
+                    legalMoves[count][0] = pos;
+                    legalMoves[count][1] = posVertical + 1;
+                    count++;
+                }
+            } if (pos % 8 > 0) {
+                if (getBit(redBoard, posVertical - 1) == 0 && getBit(blackBoard, posVertical - 1) == 0) {
+                    legalMoves[count][0] = pos;
+                    legalMoves[count][1] = posVertical - 1;
+                    count++;
+                }
+            }
+        }
+    }
+}
+
 
 /* checkLegalCaptures
  * @param int pos: position of selected piece
