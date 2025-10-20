@@ -120,8 +120,6 @@ void checkLegalCaptures(unsigned long long int redBoard, unsigned long long int 
  * @param int player: 0 for black, 1 for red
  * @returns int*: updated boards
 */
-
-
 void move(unsigned long long *boards, int initialPos, int finalPos, int player) {
     int legalMoves[24][2];
     int isLegal = 0;
@@ -134,6 +132,7 @@ void move(unsigned long long *boards, int initialPos, int finalPos, int player) 
             break;
         }
     }
+    if (initialPos == 0 && finalPos == 0) isLegal = 0;
 
     unsigned long long bitBoard = player == 1 ? boards[1] : boards[0];
     if (isLegal == 1) {
