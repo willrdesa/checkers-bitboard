@@ -76,11 +76,34 @@ void checkLegalMoves(unsigned long long int redBoard, unsigned long long int bla
 */
 
 /* move
+ * @param unsigned long long redBoard: board of red
+ * @param unsigned long long blackBoard: board of black
  * @param int initialPos: initial position of selected piece
  * @param int finalPos: position that piece is moving
  * @param int player: 0 for black, 1 for red
  * @returns int*: updated boards
 */
+void move(unsigned long long *boards, int initialPos, int finalPos, int player) {
+    int legalMoves[24][2];
+    int isLegal = 0;
+    checkLegalMoves(boards[1], boards[0], player, legalMoves);
+
+    //Check if move is legal
+    for (int i = 0; i < sizeof(legalMoves) / sizeof(legalMoves[0]); i++) {
+        if ((initialPos == legalMoves[i][0]) && (finalPos == legalMoves[i][1])) {
+            isLegal = 1;
+            break;
+        }
+    }
+
+    unsigned long long bitBoard = player == 1 ? boards[1] : boards[0];
+    if (isLegal == 1) {
+        bitBoard = modifyBit(bitBoard, initialPos, 0);
+        bitBoard = modifyBit(bitBoard, finalPos, 1);
+    } else return;
+    if (player == 1) boards[1] = bitBoard;
+    else boards[0] = bitBoard;
+}
 
 /* capture
  * @param int initialPos: initial position of selected piece
