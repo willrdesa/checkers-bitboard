@@ -68,12 +68,49 @@ void checkLegalMoves(unsigned long long int redBoard, unsigned long long int bla
     }
 }
 
-
 /* checkLegalCaptures
  * @param int pos: position of selected piece
  * @param int player: 0 for black, 1 for red
  * @returns int*: positions of available captures
 */
+void checkLegalCaptures(unsigned long long int redBoard, unsigned long long int blackBoard, int player, int legalMoves[][2]) {
+    unsigned long long int playerBoard = player == 0 ? blackBoard : redBoard;
+
+    int count = 0;
+    for (int pos = 0; pos < 64; pos++) {
+        if (getBit(playerBoard, pos) == 1) {
+            int posAdv, posAfter;
+            unsigned long long int advBoard;
+            if (player == 0) {
+                posAdv = pos + 8;
+                posAfter = pos + 16;
+                advBoard = redBoard;
+            } else {
+                posAdv = pos - 8;
+                posAfter = pos - 16;
+                advBoard = blackBoard;
+            }
+
+            if (pos % 8 < 7) {
+                if (getBit(redBoard, posAfter + 2) == 0 && getBit(blackBoard, posAfter + 2) == 0) {
+                    if (getBit(advBoard, posAdv + 1) == 1) {
+                        legalMoves[count][0] = pos;
+                        legalMoves[count][1] = posAfter + 2;
+                        count++;
+                    }
+                }
+            } if (pos % 8 > 0) {
+                if (getBit(redBoard, posAfter - 2) == 0 && getBit(blackBoard, posAfter - 2) == 0) {
+                    if (getBit(advBoard, posAdv - 1) == 1) {
+                        legalMoves[count][0] = pos;
+                        legalMoves[count][1] = posAfter - 2;
+                        count++;
+                    }
+                }
+            }
+        }
+    }
+}
 
 /* move
  * @param unsigned long long redBoard: board of red
@@ -83,6 +120,8 @@ void checkLegalMoves(unsigned long long int redBoard, unsigned long long int bla
  * @param int player: 0 for black, 1 for red
  * @returns int*: updated boards
 */
+
+
 void move(unsigned long long *boards, int initialPos, int finalPos, int player) {
     int legalMoves[24][2];
     int isLegal = 0;
