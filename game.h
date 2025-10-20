@@ -73,7 +73,7 @@ void checkLegalMoves(unsigned long long int redBoard, unsigned long long int bla
  * @param int player: 0 for black, 1 for red
  * @returns int*: positions of available captures
 */
-void checkLegalCaptures(unsigned long long int redBoard, unsigned long long int blackBoard, int player, int legalMoves[][2]) {
+void checkLegalCaptures(unsigned long long int redBoard, unsigned long long int blackBoard, int player, int legalCaptures[][3]) {
     unsigned long long int playerBoard = player == 0 ? blackBoard : redBoard;
 
     int count = 0;
@@ -94,16 +94,18 @@ void checkLegalCaptures(unsigned long long int redBoard, unsigned long long int 
             if (pos % 8 < 7) {
                 if (getBit(redBoard, posAfter + 2) == 0 && getBit(blackBoard, posAfter + 2) == 0) {
                     if (getBit(advBoard, posAdv + 1) == 1) {
-                        legalMoves[count][0] = pos;
-                        legalMoves[count][1] = posAfter + 2;
+                        legalCaptures[count][0] = pos;
+                        legalCaptures[count][1] = posAfter + 2;
+                        legalCaptures[count][2] = posAdv + 1;
                         count++;
                     }
                 }
             } if (pos % 8 > 0) {
                 if (getBit(redBoard, posAfter - 2) == 0 && getBit(blackBoard, posAfter - 2) == 0) {
                     if (getBit(advBoard, posAdv - 1) == 1) {
-                        legalMoves[count][0] = pos;
-                        legalMoves[count][1] = posAfter - 2;
+                        legalCaptures[count][0] = pos;
+                        legalCaptures[count][1] = posAfter - 2;
+                        legalCaptures[count][2] = posAdv - 1;
                         count++;
                     }
                 }
@@ -113,8 +115,7 @@ void checkLegalCaptures(unsigned long long int redBoard, unsigned long long int 
 }
 
 /* move
- * @param unsigned long long redBoard: board of red
- * @param unsigned long long blackBoard: board of black
+ * @param unsigned long long *boards: boards[0] for red and boards[1] for black
  * @param int initialPos: initial position of selected piece
  * @param int finalPos: position that piece is moving
  * @param int player: 0 for black, 1 for red
@@ -144,8 +145,54 @@ void move(unsigned long long *boards, int initialPos, int finalPos, int player) 
 }
 
 /* capture
+ * @param unsigned long long *boards: boards[0] for black and boards[1] for red
  * @param int initialPos: initial position of selected piece
  * @param int finalPos: position that piece is moving
  * @param int player: 0 for black, 1 for red
  * @returns int*: updated boards
 */
+void capture(unsigned long long *boards, int initialPos, int finalPos, int player) {
+    int legalCaptures[24][3];
+    int isLegal = 0;
+    checkLegalCaptures(boards[1], boards[0], player, legalCaptures);
+    int advPos = -1;
+
+    //Check if capture is legal
+    for (int i = 0; i < sizeof(legalCaptures) / sizeof(legalCaptures[0]); i++) {
+        if ((initialPos == legalCaptures[i][0]) && (finalPos == legalCaptures[i][1])) {
+            advPos = legalCaptures[i][2];
+            isLegal = 1;
+            break;
+        }
+    }
+    if (initialPos == 0 && finalPos == 0) isLegal = 0;
+
+    unsigned long long playerBoard, advBoard;
+    if (player == 1) {
+        playerBoard = boards[1];
+        advBoard = boards[0];
+    } else {
+        playerBoard = boards[0];
+        advBoard = boards[1];
+    }
+
+    if (isLegal == 1) {
+        playerBoard = modifyBit(playerBoard, initialPos, 0);
+        playerBoard = modifyBit(playerBoard, finalPos, 1);
+        advBoard = modifyBit(advBoard, advPos, 0);
+    } else return;
+
+    if (player == 1) {
+        boards[1] = playerBoard;
+        boards[0] = advBoard;
+    } else {
+        boards[0] = playerBoard;
+        boards[1] = advBoard;
+    }
+}
+
+int checkWin(unsigned long long *boards) {
+    if (countBits(boards[0]) == 0) return 1;
+    else if (countBits(boards[1]) == 0) return 0;
+    else return -1;
+}
